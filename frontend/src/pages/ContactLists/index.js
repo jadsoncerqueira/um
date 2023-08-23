@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useReducer } from "react";
 import { toast } from "react-toastify";
+import * as XLSX from "xlsx";
 
 import { useHistory } from "react-router-dom";
 
@@ -41,8 +42,8 @@ const reducer = (state, action) => {
     const contactLists = action.payload;
     const newContactLists = [];
 
-    contactLists.forEach((contactList) => {
-      const contactListIndex = state.findIndex((u) => u.id === contactList.id);
+    contactLists.forEach(contactList => {
+      const contactListIndex = state.findIndex(u => u.id === contactList.id);
       if (contactListIndex !== -1) {
         state[contactListIndex] = contactList;
       } else {
@@ -55,7 +56,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_CONTACTLIST") {
     const contactList = action.payload;
-    const contactListIndex = state.findIndex((u) => u.id === contactList.id);
+    const contactListIndex = state.findIndex(u => u.id === contactList.id);
 
     if (contactListIndex !== -1) {
       state[contactListIndex] = contactList;
@@ -68,7 +69,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_CONTACTLIST") {
     const contactListId = action.payload;
 
-    const contactListIndex = state.findIndex((u) => u.id === contactListId);
+    const contactListIndex = state.findIndex(u => u.id === contactListId);
     if (contactListIndex !== -1) {
       state.splice(contactListIndex, 1);
     }
@@ -80,13 +81,13 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const ContactLists = () => {
@@ -109,15 +110,69 @@ const ContactLists = () => {
   }, [searchParam]);
 
   useEffect(() => {
-    setLoading(true);
     const delayDebounceFn = setTimeout(() => {
       const fetchContactLists = async () => {
+        setLoading(true);
         try {
-          const { data } = await api.get("/contact-lists/", {
-            params: { searchParam, pageNumber },
+          let { data } = await api.get("/contact-lists/", {
+            params: { searchParam, pageNumber }
           });
-          dispatch({ type: "LOAD_CONTACTLISTS", payload: data.records });
-          setHasMore(data.hasMore);
+          // console.log(data.records);
+          const isDefaultList = data.records.some(
+            list => list.name === "todos"
+          );
+          if (!isDefaultList && localStorage.getItem("isImport") === "1") {
+            const cI = localStorage.getItem("companyId");
+            const lista = await api.post("/contact-lists", {
+              name: "todos",
+              companyId: cI
+            });
+
+            const listas = await api.get("/contacts/list");
+            const newContacts = listas.data.map(({ name, number, email }) => ({
+              nome: name,
+              numero: number,
+              "e-mail": email
+            }));
+            console.log(newContacts);
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(newContacts);
+            XLSX.utils.book_append_sheet(wb, ws, "Contatos");
+
+            const wopts = { bookType: "xlsx", bookSST: false, type: "array" };
+            const dataInMemory = XLSX.write(wb, wopts);
+
+            const blobData = new Blob([dataInMemory], {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            });
+
+            const arquivoExcel = new File([blobData], "dados.xlsx", {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            });
+
+            console.log(arquivoExcel);
+
+            const formData = new FormData();
+            formData.append("file", arquivoExcel);
+
+            function esperar(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            api.request({
+              url: `contact-lists/${lista.data.id}/upload`,
+              method: "POST",
+              data: formData
+            });
+            await esperar(3000);
+          }
+
+          let teste = await api.get("/contact-lists/", {
+            params: { searchParam, pageNumber }
+          });
+
+          dispatch({ type: "LOAD_CONTACTLISTS", payload: teste.data.records });
+          setHasMore(teste.data.hasMore);
           setLoading(false);
         } catch (err) {
           toastError(err);
@@ -127,12 +182,13 @@ const ContactLists = () => {
     }, 500);
     return () => clearTimeout(delayDebounceFn);
   }, [searchParam, pageNumber]);
+  console.log(loading);
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketConnection({ companyId });
 
-    socket.on(`company-${companyId}-ContactList`, (data) => {
+    socket.on(`company-${companyId}-ContactList`, data => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_CONTACTLIST", payload: data.record });
       }
@@ -157,16 +213,16 @@ const ContactLists = () => {
     setContactListModalOpen(false);
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = event => {
     setSearchParam(event.target.value.toLowerCase());
   };
 
-  const handleEditContactList = (contactList) => {
+  const handleEditContactList = contactList => {
     setSelectedContactList(contactList);
     setContactListModalOpen(true);
   };
 
-  const handleDeleteContactList = async (contactListId) => {
+  const handleDeleteContactList = async contactListId => {
     try {
       await api.delete(`/contact-lists/${contactListId}`);
       toast.success(i18n.t("contactLists.toasts.deleted"));
@@ -179,10 +235,10 @@ const ContactLists = () => {
   };
 
   const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+    setPageNumber(prevState => prevState + 1);
   };
 
-  const handleScroll = (e) => {
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -190,7 +246,7 @@ const ContactLists = () => {
     }
   };
 
-  const goToContacts = (id) => {
+  const goToContacts = id => {
     history.push(`/contact-lists/${id}/contacts`);
   };
 
@@ -234,7 +290,7 @@ const ContactLists = () => {
                       <InputAdornment position="start">
                         <SearchIcon style={{ color: "gray" }} />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
               </Grid>
@@ -273,7 +329,7 @@ const ContactLists = () => {
           </TableHead>
           <TableBody>
             <>
-              {contactLists.map((contactList) => (
+              {contactLists.map(contactList => (
                 <TableRow key={contactList.id}>
                   <TableCell align="center">{contactList.name}</TableCell>
                   <TableCell align="center">
@@ -302,7 +358,7 @@ const ContactLists = () => {
 
                     <IconButton
                       size="small"
-                      onClick={(e) => {
+                      onClick={e => {
                         setConfirmModalOpen(true);
                         setDeletingContactList(contactList);
                       }}

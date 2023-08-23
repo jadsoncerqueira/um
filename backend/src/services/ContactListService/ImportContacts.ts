@@ -68,9 +68,11 @@ export async function ImportContacts(
         newContact.isWhatsappValid = response.exists;
         const number = response.jid.replace(/\D/g, "");
         newContact.number = number;
-        await newContact.save();
+        if (number !== "120363144163392559") {
+          await newContact.save();
+        }
       } catch (e) {
-        logger.error(`Número de contato inválido: ${newContact.number}`);
+        logger.error(`Número de contato inválido 2: ${newContact.number}`);
       }
     }
   }

@@ -34,6 +34,9 @@ class Company extends Model<Company> {
   name: string;
 
   @Column
+  logo: string;
+
+  @Column
   phone: string;
 
   @Column

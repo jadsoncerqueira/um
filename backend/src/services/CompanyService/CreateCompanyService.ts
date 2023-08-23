@@ -69,9 +69,9 @@ const CreateCompanyService = async (
   const [user, created] = await User.findOrCreate({
     where: { name, email },
     defaults: {
-      name: name,
-      email: email,
-      password: "mudar123",
+      name,
+      email,
+      password,
       profile: "admin",
       companyId: company.id
     }
@@ -90,7 +90,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "asaas",
       value: ""
-    },
+    }
   });
 
   //tokenixc
@@ -103,7 +103,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "tokenixc",
       value: ""
-    },
+    }
   });
 
   //ipixc
@@ -116,7 +116,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "ipixc",
       value: ""
-    },
+    }
   });
 
   //ipmkauth
@@ -129,7 +129,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "ipmkauth",
       value: ""
-    },
+    }
   });
 
   //clientsecretmkauth
@@ -142,7 +142,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "clientsecretmkauth",
       value: ""
-    },
+    }
   });
 
   //clientidmkauth
@@ -155,7 +155,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "clientidmkauth",
       value: ""
-    },
+    }
   });
 
   //CheckMsgIsGroup
@@ -168,7 +168,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "enabled",
       value: ""
-    },
+    }
   });
 
   //CheckMsgIsGroup
@@ -181,7 +181,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "call",
       value: "disabled"
-    },
+    }
   });
 
   //scheduleType
@@ -194,7 +194,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "scheduleType",
       value: "disabled"
-    },
+    }
   });
 
   //userRating
@@ -207,7 +207,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "userRating",
       value: "disabled"
-    },
+    }
   });
 
   //userRating
@@ -220,7 +220,7 @@ const CreateCompanyService = async (
       companyId: company.id,
       key: "chatBotType",
       value: "text"
-    },
+    }
   });
 
   if (companyData.campaignsEnabled !== undefined) {
@@ -233,8 +233,7 @@ const CreateCompanyService = async (
         companyId: company.id,
         key: "campaignsEnabled",
         value: `${campaignsEnabled}`
-      },
-
+      }
     });
     if (!created) {
       await setting.update({ value: `${campaignsEnabled}` });

@@ -42,8 +42,8 @@ const reducer = (state, action) => {
     const contacts = action.payload;
     const newContacts = [];
 
-    contacts.forEach((contact) => {
-      const contactIndex = state.findIndex((c) => c.id === contact.id);
+    contacts.forEach(contact => {
+      const contactIndex = state.findIndex(c => c.id === contact.id);
       if (contactIndex !== -1) {
         state[contactIndex] = contact;
       } else {
@@ -56,7 +56,7 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_CONTACTS") {
     const contact = action.payload;
-    const contactIndex = state.findIndex((c) => c.id === contact.id);
+    const contactIndex = state.findIndex(c => c.id === contact.id);
 
     if (contactIndex !== -1) {
       state[contactIndex] = contact;
@@ -69,7 +69,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_CONTACT") {
     const contactId = action.payload;
 
-    const contactIndex = state.findIndex((c) => c.id === contactId);
+    const contactIndex = state.findIndex(c => c.id === contactId);
     if (contactIndex !== -1) {
       state.splice(contactIndex, 1);
     }
@@ -81,13 +81,13 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
+    ...theme.scrollbarStyles
+  }
 }));
 
 const Contacts = () => {
@@ -119,7 +119,7 @@ const Contacts = () => {
       const fetchContacts = async () => {
         try {
           const { data } = await api.get("/contacts/", {
-            params: { searchParam, pageNumber },
+            params: { searchParam, pageNumber }
           });
           dispatch({ type: "LOAD_CONTACTS", payload: data.contacts });
           setHasMore(data.hasMore);
@@ -137,7 +137,7 @@ const Contacts = () => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketConnection({ companyId });
 
-    socket.on(`company-${companyId}-contact`, (data) => {
+    socket.on(`company-${companyId}-contact`, data => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_CONTACTS", payload: data.contact });
       }
@@ -147,12 +147,23 @@ const Contacts = () => {
       }
     });
 
+    // handleimportContact();
+
     return () => {
       socket.disconnect();
     };
   }, []);
 
-  const handleSearch = (event) => {
+  useEffect(() => {
+    if (!localStorage.getItem("isImport")) {
+      localStorage.setItem("isImport", "0");
+    }
+    if (localStorage.getItem("isImport") === "0" && contacts.length < 1) {
+      handleimportContact2();
+    }
+  }, []);
+
+  const handleSearch = event => {
     setSearchParam(event.target.value.toLowerCase());
   };
 
@@ -182,19 +193,19 @@ const Contacts = () => {
   // 	setLoading(false);
   // };
 
-  const handleCloseOrOpenTicket = (ticket) => {
+  const handleCloseOrOpenTicket = ticket => {
     setNewTicketModalOpen(false);
     if (ticket !== undefined && ticket.uuid !== undefined) {
       history.push(`/tickets/${ticket.uuid}`);
     }
   };
 
-  const hadleEditContact = (contactId) => {
+  const hadleEditContact = contactId => {
     setSelectedContactId(contactId);
     setContactModalOpen(true);
   };
 
-  const handleDeleteContact = async (contactId) => {
+  const handleDeleteContact = async contactId => {
     try {
       await api.delete(`/contacts/${contactId}`);
       toast.success(i18n.t("contacts.toasts.deleted"));
@@ -215,11 +226,23 @@ const Contacts = () => {
     }
   };
 
-  const loadMore = () => {
-    setPageNumber((prevState) => prevState + 1);
+  const handleimportContact2 = async () => {
+    try {
+      await api.post("/contacts/import");
+      localStorage.setItem("isImport", "1");
+      // const conta = await api.get("/contacts");
+      // console.log(conta.data);
+      history.go(0);
+    } catch (err) {
+      localStorage.setItem("isImport", "0");
+    }
   };
 
-  const handleScroll = (e) => {
+  const loadMore = () => {
+    setPageNumber(prevState => prevState + 1);
+  };
+
+  const handleScroll = e => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -232,7 +255,7 @@ const Contacts = () => {
       <NewTicketModal
         modalOpen={newTicketModalOpen}
         initialContact={contactTicket}
-        onClose={(ticket) => {
+        onClose={ticket => {
           handleCloseOrOpenTicket(ticket);
         }}
       />
@@ -252,7 +275,7 @@ const Contacts = () => {
         }
         open={confirmOpen}
         onClose={setConfirmOpen}
-        onConfirm={(e) =>
+        onConfirm={e =>
           deletingContact
             ? handleDeleteContact(deletingContact.id)
             : handleimportContact()
@@ -275,13 +298,13 @@ const Contacts = () => {
                 <InputAdornment position="start">
                   <SearchIcon style={{ color: "gray" }} />
                 </InputAdornment>
-              ),
+              )
             }}
           />
           <Button
             variant="contained"
             color="primary"
-            onClick={(e) => setConfirmOpen(true)}
+            onClick={e => setConfirmOpen(true)}
           >
             {i18n.t("contacts.buttons.import")}
           </Button>
@@ -317,7 +340,7 @@ const Contacts = () => {
           </TableHead>
           <TableBody>
             <>
-              {contacts.map((contact) => (
+              {contacts.map(contact => (
                 <TableRow key={contact.id}>
                   <TableCell style={{ paddingRight: 0 }}>
                     {<Avatar src={contact.profilePicUrl} />}
@@ -347,7 +370,7 @@ const Contacts = () => {
                       yes={() => (
                         <IconButton
                           size="small"
-                          onClick={(e) => {
+                          onClick={e => {
                             setConfirmOpen(true);
                             setDeletingContact(contact);
                           }}

@@ -14,6 +14,11 @@ module.exports = {
         allowNull: false,
         unique: true
       },
+      logo: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true
+      },
       phone: {
         type: DataTypes.STRING,
         allowNull: true

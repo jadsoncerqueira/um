@@ -63,4 +63,14 @@ const UpdateCompanyService = async (
   return company;
 };
 
+export const UpdateImageService = async (
+  id: string | number,
+  logo: string
+): Promise<void> => {
+  const company = await Company.findByPk(id);
+  await company.update({
+    logo
+  });
+};
+
 export default UpdateCompanyService;

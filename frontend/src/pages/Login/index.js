@@ -16,7 +16,6 @@ import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import logo from "../../assets/logoLoginOption.png";
 
-
 // const Copyright = () => {
 // 	return (
 // 		<Typography variant="body2" color="textSecondary" align="center">
@@ -31,93 +30,108 @@ import logo from "../../assets/logoLoginOption.png";
 // };
 
 const useStyles = makeStyles(theme => ({
-	paper: {
-		marginTop: theme.spacing(8),
-		display: "flex",
-		flexDirection: "column",
-		alignItems: "center",
-	},
-	avatar: {
-		margin: theme.spacing(1),
-		backgroundColor: theme.palette.secondary.main,
-	},
-	form: {
-		width: "100%", // Fix IE 11 issue.
-		marginTop: theme.spacing(1),
-	},
-	submit: {
-		margin: theme.spacing(3, 0, 2),
-	},
+  paper: {
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main
+  },
+  form: {
+    width: "100%", // Fix IE 11 issue.
+    marginTop: theme.spacing(1)
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2)
+  }
 }));
 
 const Login = () => {
-	const classes = useStyles();
+  const classes = useStyles();
 
-	const [user, setUser] = useState({ email: "", password: "" });
+  const [user, setUser] = useState({ email: "", password: "" });
 
-	const { handleLogin } = useContext(AuthContext);
+  const { handleLogin } = useContext(AuthContext);
 
-	const handleChangeInput = e => {
-		setUser({ ...user, [e.target.name]: e.target.value });
-	};
+  const handleChangeInput = e => {
+    setUser({ ...user, [e.target.name]: e.target.value });
+  };
 
-	const handlSubmit = e => {
-		e.preventDefault();
-		handleLogin(user);
-	};
+  const handlSubmit = e => {
+    e.preventDefault();
+    handleLogin(user);
+  };
 
-	return (
-		<Container component="main" maxWidth="xs">
-			<CssBaseline />
-			<div className={classes.paper}>
-				<div>
-					<img style={{ margin: "0 auto", height: "80px", width: "100%" }} src={logo} alt="Whats" />
-				</div>
-				{/* <Typography component="h1" variant="h5">
+  return (
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <div>
+          <img
+            style={{ margin: "0 auto", height: "80px", width: "100%" }}
+            src={logo}
+            alt="Whats"
+          />
+        </div>
+        {/* <Typography component="h1" variant="h5">
 					{i18n.t("login.title")}
 				</Typography> */}
-				<form className={classes.form} noValidate onSubmit={handlSubmit}>
-					<TextField
-						variant="outlined"
-						margin="normal"
-						required
-						fullWidth
-						id="email"
-						label={i18n.t("login.form.email")}
-						name="email"
-						value={user.email}
-						onChange={handleChangeInput}
-						autoComplete="email"
-						autoFocus
-					/>
-					<TextField
-						variant="outlined"
-						margin="normal"
-						required
-						fullWidth
-						name="password"
-						label={i18n.t("login.form.password")}
-						type="password"
-						id="password"
-						value={user.password}
-						onChange={handleChangeInput}
-						autoComplete="current-password"
-					/>
-					<Button
-						type="submit"
-						fullWidth
-						variant="contained"
-						color="primary"
-						className={classes.submit}
-					>
-						{i18n.t("login.buttons.submit")}
-					</Button>
-					
-				</form>
-			</div>
-			<Box mt={8}>{/* <Copyright /> */}</Box>
-		</Container>
-	);
+        <form className={classes.form} noValidate onSubmit={handlSubmit}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label={i18n.t("login.form.email")}
+            name="email"
+            value={user.email}
+            onChange={handleChangeInput}
+            autoComplete="email"
+            autoFocus
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label={i18n.t("login.form.password")}
+            type="password"
+            id="password"
+            value={user.password}
+            onChange={handleChangeInput}
+            autoComplete="current-password"
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            {i18n.t("login.buttons.submit")}
+          </Button>
+          <Grid container>
+            <Grid item>
+              <Link
+                href="#"
+                variant="body2"
+                component={RouterLink}
+                to="/signup"
+              >
+                {i18n.t("login.buttons.register")}
+              </Link>
+            </Grid>
+          </Grid>
+        </form>
+      </div>
+      <Box mt={8}>{/* <Copyright /> */}</Box>
+    </Container>
+  );
 };
 
 export default Login;

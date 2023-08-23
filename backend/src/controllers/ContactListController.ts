@@ -141,19 +141,23 @@ export const findList = async (
 };
 
 export const upload = async (req: Request, res: Response) => {
-  const files = req.files as Express.Multer.File[];
-  const file: Express.Multer.File = head(files) as Express.Multer.File;
-  const { id } = req.params;
-  const { companyId } = req.user;
+  try {
+    const files = req.files as Express.Multer.File[];
+    const file: Express.Multer.File = head(files) as Express.Multer.File;
+    const { id } = req.params;
+    const { companyId } = req.user;
 
-  const response = await ImportContacts(+id, companyId, file);
+    const response = await ImportContacts(+id, companyId, file);
 
-  const io = getIO();
+    const io = getIO();
 
-  io.emit(`company-${companyId}-ContactListItem-${+id}`, {
-    action: "reload",
-    records: response
-  });
+    io.emit(`company-${companyId}-ContactListItem-${+id}`, {
+      action: "reload",
+      records: response
+    });
 
-  return res.status(200).json(response);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(200).json("");
+  }
 };

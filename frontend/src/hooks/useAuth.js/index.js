@@ -16,7 +16,7 @@ const useAuth = () => {
   const [user, setUser] = useState({});
 
   api.interceptors.request.use(
-    (config) => {
+    config => {
       const token = localStorage.getItem("token");
       if (token) {
         config.headers["Authorization"] = `Bearer ${JSON.parse(token)}`;
@@ -24,16 +24,16 @@ const useAuth = () => {
       }
       return config;
     },
-    (error) => {
+    error => {
       Promise.reject(error);
     }
   );
 
   api.interceptors.response.use(
-    (response) => {
+    response => {
       return response;
     },
-    async (error) => {
+    async error => {
       const originalRequest = error.config;
       if (error?.response?.status === 403 && !originalRequest._retry) {
         originalRequest._retry = true;
@@ -76,7 +76,7 @@ const useAuth = () => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketConnection({ companyId });
 
-    socket.on(`company-${companyId}-user`, (data) => {
+    socket.on(`company-${companyId}-user`, data => {
       if (data.action === "update" && data.user.id === user.id) {
         setUser(data.user);
       }
@@ -88,34 +88,34 @@ const useAuth = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const handleLogin = async (userData) => {
+  const handleLogin = async userData => {
     setLoading(true);
 
     try {
       const { data } = await api.post("/auth/login", userData);
       const {
-        user: { companyId, id, company },
+        user: { companyId, id, company }
       } = data;
 
       if (has(company, "settings") && isArray(company.settings)) {
         const setting = company.settings.find(
-          (s) => s.key === "campaignsEnabled"
+          s => s.key === "campaignsEnabled"
         );
         if (setting && setting.value === "true") {
           localStorage.setItem("cshow", null); //regra pra exibir campanhas
         }
       }
 
-      moment.locale('pt-br');
+      moment.locale("pt-br");
       const dueDate = data.user.company.dueDate;
       const hoje = moment(moment()).format("DD/MM/yyyy");
       const vencimento = moment(dueDate).format("DD/MM/yyyy");
-      
+
       var diff = moment(dueDate).diff(moment(moment()).format());
 
       var before = moment(moment().format()).isBefore(dueDate);
       var dias = moment.duration(diff).asDays();
-      var diasVenc = vencimento.valueOf() - hoje.valueOf()
+      var diasVenc = vencimento.valueOf() - hoje.valueOf();
       console.log("🚀 Console Log : diasVenc", diasVenc);
 
       if (before === true) {
@@ -128,18 +128,22 @@ const useAuth = () => {
         setIsAuth(true);
         toast.success(i18n.t("auth.toasts.success"));
         if (Math.round(dias) < 5) {
-          toast.warn(`Sua assinatura vence em ${Math.round(dias)} ${Math.round(dias) === 1 ? 'dia' : 'dias'} `);
+          toast.warn(
+            `Sua assinatura vence em ${Math.round(dias)} ${
+              Math.round(dias) === 1 ? "dia" : "dias"
+            } `
+          );
         }
         history.push("/tickets");
         setLoading(false);
       } else {
-        console.log("BLOQUEADO")
+        console.log("BLOQUEADO");
         toastError(`Opss! Sua assinatura venceu ${vencimento}.
 Entre em contato com o Suporte para mais informações! `);
         setLoading(false);
       }
 
-      //quebra linha 
+      //quebra linha
     } catch (err) {
       toastError(err);
       setLoading(false);
@@ -157,6 +161,9 @@ Entre em contato com o Suporte para mais informações! `);
       localStorage.removeItem("companyId");
       localStorage.removeItem("userId");
       localStorage.removeItem("cshow");
+      if (localStorage.getItem("isImport")) {
+        localStorage.removeItem("isImport");
+      }
       api.defaults.headers.Authorization = undefined;
       setLoading(false);
       history.push("/login");
@@ -181,7 +188,7 @@ Entre em contato com o Suporte para mais informações! `);
     loading,
     handleLogin,
     handleLogout,
-    getCurrentUserInfo,
+    getCurrentUserInfo
   };
 };
 
